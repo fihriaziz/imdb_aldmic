@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -18,4 +19,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/movies/favorite/add', [MovieController::class, 'addFavorite'])->name('movies.favorite.add');
     Route::post('/movies/favorite/remove', [MovieController::class, 'removeFavorite'])->name('movies.favorite.remove');
     Route::post('/movies/favorite/check', [MovieController::class, 'isFavorite'])->name('movies.favorite.check');
+
+    // Language routes
+    Route::post('/language/change', [LanguageController::class, 'change'])->name('language.change');
 });
+
+// Language API route (accessible without auth for AJAX)
+Route::get('/api/languages', [LanguageController::class, 'getAvailable'])->name('languages.available');

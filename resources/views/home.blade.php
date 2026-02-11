@@ -25,14 +25,14 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">Daftar Film</h3>
+                    <h3 class="mb-0">{{ __('messages.movie_list') }}</h3>
                     <a href="{{ route('favorites.index') }}" class="btn btn-sm btn-warning">
-                        <i class="fas fa-heart"></i> Favorit Saya
+                        <i class="fas fa-heart"></i> {{ __('messages.my_favorites') }}
                     </a>
                 </div>
                 <div class="col-md-12 mt-3">
                     <div class="ml-3">
-                        <input type="text" class="form-control" placeholder="Cari film..." id="searchInput">
+                        <input type="text" class="form-control" placeholder="{{ __('messages.search_movies') }}" id="searchInput">
                     </div>
                 </div>
                 <div class="card-body">

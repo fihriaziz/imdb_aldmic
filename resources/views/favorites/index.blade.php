@@ -5,9 +5,9 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">Film Favorit Saya</h3>
+                    <h3 class="mb-0">{{ __('messages.my_favorites') }}</h3>
                     <a href="{{ route('home') }}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-arrow-left"></i> Kembali ke List
+                        <i class="fas fa-arrow-left"></i> {{ __('messages.back_to_list') }}
                     </a>
                 </div>
                 <div class="card-body">
@@ -23,13 +23,13 @@
                                             <p class="card-text">
                                                 <small class="text-muted">
                                                     <strong>ID:</strong> {{ $favorite->movie_id }}<br>
-                                                    <strong>Ditambahkan:</strong> {{ $favorite->created_at->format('d M Y') }}
+                                                    <strong>{{ __('messages.added') }}:</strong> {{ $favorite->created_at->format('d M Y') }}
                                                 </small>
                                             </p>
                                         </div>
                                         <div class="card-footer bg-transparent">
                                             <button class="btn btn-sm btn-danger btn-remove-favorite" data-id="{{ $favorite->movie_id }}">
-                                                <i class="fas fa-trash"></i> Hapus
+                                                <i class="fas fa-trash"></i> {{ __('messages.delete') }}
                                             </button>
                                         </div>
                                     </div>
@@ -38,7 +38,7 @@
                         </div>
                     @else
                         <div class="alert alert-info">
-                            <p>Belum ada film favorit. <a href="{{ route('home') }}">Tambahkan film favorit di sini</a></p>
+                            <p>{{ __('messages.no_favorites') }} <a href="{{ route('home') }}">{{ __('messages.add_favorites_here') }}</a></p>
                         </div>
                     @endif
                 </div>

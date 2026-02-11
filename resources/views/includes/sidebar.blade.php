@@ -16,7 +16,7 @@
     <li class="nav-item active">
         <a class="nav-link" href="index.html">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
+            <span>{{ __('messages.dashboard') }}</span></a>
     </li>
 
     <!-- Divider -->
@@ -24,21 +24,21 @@
 
     <!-- Heading -->
     <div class="sidebar-heading">
-        Addons
+        {{ __('messages.addons') }}
     </div>
 
     <!-- Nav Item - Charts -->
     <li class="nav-item">
         <a class="nav-link" href="{{ route('home')}}">
             <i class="fas fa-fw fa-chart-area"></i>
-            <span>Movies</span></a>
+            <span>{{ __('messages.movies') }}</span></a>
     </li>
 
     <!-- Nav Item - Tables -->
     <li class="nav-item">
         <a class="nav-link" href="{{ route('favorites.index') }}">
             <i class="fas fa-fw fa-table"></i>
-            <span>Favorites</span></a>
+            <span>{{ __('messages.favorites') }}</span></a>
     </li>
 
 </ul>
