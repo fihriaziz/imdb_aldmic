@@ -1,0 +1,72 @@
+@extends('layouts.admin')
+@section('title', 'Home Pages')
+@section('content')
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Daftar Film</h3>
+                    <a href="{{ route('favorites.index') }}" class="btn btn-sm btn-warning">
+                        <i class="fas fa-heart"></i> Favorit Saya
+                    </a>
+                </div>
+                <div class="col-md-12 mt-3">
+                    <div class="ml-3">
+                        <input type="text" class="form-control" placeholder="Cari film..." id="searchInput">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="moviesContainer">
+                        <p class="text-center col-md-12">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Movie Detail -->
+    <div class="modal fade" id="movieModal" tabindex="-1" role="dialog" aria-labelledby="movieModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content" id="modalMovieModal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="movieModalLabel">Detail Film</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img id="modalMoviePoster" src="" alt="Poster" class="img-fluid mb-3">
+                        </div>
+                        <div class="col-md-8">
+                            <h4 id="modalMovieTitle"></h4>
+                            <hr>
+                            <p>
+                                <strong>Tahun:</strong> <span id="modalMovieYear"></span><br>
+                                <strong>Tipe:</strong> <span id="modalMovieType"></span><br>
+                                <strong>ID Film:</strong> <span id="modalMovieId"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-sm btn-warning btn-favorite-detail" title="Tambah ke favorit">
+                        <i class="fas fa-star"></i> Favorit
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endsection
+@push('js')
+<script>
+    const apiUrl = '{{ route("movies") }}';
+    const addFavoriteUrl = '{{ route("movies.favorite.add") }}';
+    const removeFavoriteUrl = '{{ route("movies.favorite.remove") }}';
+    const getAllFavoritesUrl = '{{ route("movies.favorites") }}';
+    const tokenCsrf = '{{ csrf_token() }}';
+</script>
+@endpush
