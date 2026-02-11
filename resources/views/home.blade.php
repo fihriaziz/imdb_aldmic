@@ -1,5 +1,25 @@
 @extends('layouts.admin')
 @section('title', 'Home Pages')
+@push('css')
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .lazy-image {
+            opacity: 0;
+        }
+
+        .lazy-image.loaded {
+            opacity: 1;
+        }
+    </style>
+@endpush
 @section('content')
     <div class="row">
         <div class="col-md-12">
@@ -18,6 +38,12 @@
                 <div class="card-body">
                     <div class="row" id="moviesContainer">
                         <p class="text-center col-md-12">Loading...</p>
+                    </div>
+                    <div class="text-center" id="loadingIndicator" style="display: none; padding: 20px;">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading more movies...</p>
                     </div>
                 </div>
             </div>
@@ -67,6 +93,5 @@
     const addFavoriteUrl = '{{ route("movies.favorite.add") }}';
     const removeFavoriteUrl = '{{ route("movies.favorite.remove") }}';
     const getAllFavoritesUrl = '{{ route("movies.favorites") }}';
-    const tokenCsrf = '{{ csrf_token() }}';
 </script>
 @endpush

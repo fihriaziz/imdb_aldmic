@@ -18,23 +18,33 @@ class MovieController extends Controller
     {
         $apiKey = env('OMDB_MOVIE_API_KEY');
         $searchQuery = $request->get('search', 'movie');
+        $page = $request->get('page', 1);
 
         try {
             $response = Http::get('https://www.omdbapi.com/', [
                 'apikey' => $apiKey,
                 's' => $searchQuery,
-                'type' => 'movie'
+                'type' => 'movie',
+                'page' => $page
             ]);
 
             $data = $response->json();
 
             if ($response->successful() && isset($data['Search'])) {
                 $movies = $data['Search'];
+                $totalResults = isset($data['totalResults']) ? (int)$data['totalResults'] : 0;
             } else {
                 $movies = [];
+                $totalResults = 0;
             }
 
-            return response()->json(['success' => true, 'data' => $movies]);
+            return response()->json([
+                'success' => true,
+                'data' => $movies,
+                'totalResults' => $totalResults,
+                'currentPage' => (int)$page,
+                'totalPages' => ceil($totalResults / 8)
+            ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'data' => []], 500);
         }

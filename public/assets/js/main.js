@@ -1,12 +1,43 @@
 $(document).ready(function() {
     let allMovies = [];
     let favoriteMovies = {};
+    let currentPage = 1;
+    let currentSearch = 'movie';
+    let totalPages = 0;
+    let isLoading = false;
 
-    function renderMovies(movies) {
+    // Setup Intersection Observer untuk Lazy Loading Images
+    const lazyImageObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                const src = img.getAttribute('data-src');
+
+                if (src && !img.classList.contains('loaded')) {
+                    img.src = src;
+                    img.classList.add('loaded');
+                    img.addEventListener('load', function() {
+                        // Fade in effect saat gambar loaded
+                        img.style.animation = 'fadeIn 0.5s ease-in';
+                    });
+                    lazyImageObserver.unobserve(img);
+                }
+            }
+        });
+    }, {
+        rootMargin: '50px' // Load 50px sebelum reach viewport
+    });
+
+    window.lazyImageObserver = lazyImageObserver;
+
+    function renderMovies(movies, append = false) {
         const container = $('#moviesContainer');
-        container.empty();
 
-        if (movies.length === 0) {
+        if (!append) {
+            container.empty();
+        }
+
+        if (movies.length === 0 && !append) {
             container.html('<div class="alert alert-info col-md-12">Tidak ada film yang ditemukan</div>');
             return;
         }
@@ -19,8 +50,17 @@ $(document).ready(function() {
             const movieCard = `
                 <div class="col-md-3 mb-4">
                     <div class="card h-100">
-                        <img src="${movie.Poster}"
-                             alt="${movie.Title}" class="card-img-top" style="height: 330px; object-fit: cover;">
+                        <div class="position-relative" style="background: #f0f0f0; height: 330px; display: flex; align-items: center; justify-content: center;">
+                            <img class="lazy-image card-img-top"
+                                 data-src="${movie.Poster}"
+                                 alt="${movie.Title}"
+                                 style="height: 330px; object-fit: cover; width: 100%;">
+                            <div class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body">
                             <h5 class="card-title">${movie.Title}</h5>
                             <p class="card-text">
@@ -42,31 +82,101 @@ $(document).ready(function() {
             `;
             container.append(movieCard);
         });
+
+        // Setup lazy loading untuk gambar yang baru di-render
+        setupLazyLoading();
+
+        // Tambahkan sentinel untuk infinite scroll
+        if (append && currentPage < totalPages) {
+            container.append('<div id="scrollSentinel" class="col-md-12"></div>');
+            setupInfiniteScroll();
+        } else if (!append && currentPage < totalPages) {
+            container.append('<div id="scrollSentinel" class="col-md-12"></div>');
+            setupInfiniteScroll();
+        }
     }
 
-    function fetchMovies(searchQuery = 'movie') {
+    // Setup lazy loading untuk images
+    function setupLazyLoading() {
+        const lazyImages = document.querySelectorAll('.lazy-image:not(.loaded)');
+
+        if (window.lazyImageObserver) {
+            lazyImages.forEach(img => window.lazyImageObserver.observe(img));
+        }
+    }
+
+    function setupInfiniteScroll() {
+        const sentinel = document.getElementById('scrollSentinel');
+
+        if (!sentinel) return;
+
+        // Hapus observer lama jika ada
+        if (window.sentinelObserver) {
+            window.sentinelObserver.disconnect();
+        }
+
+        // Setup Intersection Observer
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting && !isLoading && currentPage < totalPages) {
+                    isLoading = true;
+                    fetchMovies(currentSearch, currentPage + 1);
+                }
+            });
+        }, {
+            root: null,
+            rootMargin: '100px',
+            threshold: 0.1
+        });
+
+        observer.observe(sentinel);
+        window.sentinelObserver = observer;
+    }
+
+    function fetchMovies(searchQuery = 'movie', page = 1) {
+        currentSearch = searchQuery;
+        currentPage = page;
+
+        // Show loading indicator untuk page > 1
+        if (page > 1) {
+            $('#loadingIndicator').show();
+        }
+
         $.ajax({
             url: apiUrl,
             type: 'GET',
-            data: { search: searchQuery },
+            data: { search: searchQuery, page: page },
             success: function(response) {
                 if (response.success) {
-                    allMovies = response.data;
+                    totalPages = response.totalPages;
+
+                    if (page === 1) {
+                        allMovies = response.data;
+                        renderMovies(allMovies, false);
+                    } else {
+                        allMovies = allMovies.concat(response.data);
+                        renderMovies(response.data, true);
+                    }
+
                     loadFavoriteStatus();
-                    renderMovies(allMovies);
+                    isLoading = false;
                 } else {
                     allMovies = [];
                     renderMovies([]);
+                    isLoading = false;
                 }
+
+                // Hide loading indicator
+                $('#loadingIndicator').hide();
             },
             error: function(xhr, status, error) {
                 console.error('Error fetching movies:', error);
-                renderMovies([]);
+                isLoading = false;
+                $('#loadingIndicator').hide();
             }
         });
     }
 
-    // Load all favorite status sekali saja
     function loadFavoriteStatus() {
         $.ajax({
             url: getAllFavoritesUrl,
@@ -76,6 +186,21 @@ $(document).ready(function() {
                     favoriteMovies = {};
                     response.data.forEach(function(fav) {
                         favoriteMovies[fav.movie_id] = true;
+                    });
+                    // Re-render to update button colors
+                    const container = $('#moviesContainer');
+                    container.find('.btn-favorite').each(function() {
+                        const btn = $(this);
+                        const movieId = btn.data('id');
+                        const isFav = favoriteMovies[movieId] || false;
+
+                        if (isFav) {
+                            btn.addClass('btn-danger').removeClass('btn-warning');
+                            btn.attr('title', 'Hapus dari favorit');
+                        } else {
+                            btn.removeClass('btn-danger').addClass('btn-warning');
+                            btn.attr('title', 'Tambah ke favorit');
+                        }
                     });
                 }
             }
@@ -89,10 +214,10 @@ $(document).ready(function() {
         clearTimeout(searchTimeout);
 
         if (searchTerm.length === 0) {
-            fetchMovies('movie');
+            fetchMovies('movie', 1);
         } else if (searchTerm.length >= 2) {
             searchTimeout = setTimeout(function() {
-                fetchMovies(searchTerm);
+                fetchMovies(searchTerm, 1);
             }, 500);
         }
     });
@@ -113,7 +238,6 @@ $(document).ready(function() {
             $('#modalMovieType').text(movieDetail.Type);
             $('#modalMovieId').text(movieDetail.imdbID);
 
-            // Set button favorite di modal
             const modalFavoriteBtn = $('#modalMovieModal .btn-favorite-detail');
             modalFavoriteBtn.data('id', movieDetail.imdbID);
             modalFavoriteBtn.data('title', movieDetail.Title);
@@ -125,7 +249,6 @@ $(document).ready(function() {
         }
     }
 
-    // Handle favorite button click - toggle
     $(document).on('click', '.btn-favorite, .btn-favorite-detail', function(e) {
         e.preventDefault();
         const btn = $(this);
@@ -135,10 +258,8 @@ $(document).ready(function() {
         const isFav = favoriteMovies[movieId] || false;
 
         if (isFav) {
-            // Remove from favorite
             toggleFavorite(movieId, false, btn);
         } else {
-            // Add to favorite
             toggleFavorite(movieId, true, btn, movieTitle, moviePoster);
         }
     });
@@ -161,10 +282,8 @@ $(document).ready(function() {
             data: data,
             success: function(response) {
                 if (response.success) {
-                    // Update local state
                     favoriteMovies[movieId] = isAdd;
 
-                    // Update button style
                     if (isAdd) {
                         btn.addClass('btn-danger').removeClass('btn-warning');
                         btn.attr('title', 'Hapus dari favorit');
@@ -196,7 +315,6 @@ $(document).ready(function() {
     }
 
     function showNotification(message) {
-        // Simple notification (bisa diganti dengan toast library)
         const alert = $(`<div class="alert alert-success alert-notification">${message}</div>`);
         $('body').prepend(alert);
         setTimeout(() => alert.fadeOut(300, function() { $(this).remove(); }), 3000);
