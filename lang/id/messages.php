@@ -10,7 +10,7 @@ return [
     'add_favorites_here' => 'Tambahkan film favorit di sini',
     'added' => 'Ditambahkan',
     'delete' => 'Hapus',
-    'dashboard' => 'Dashboard',
+    'dashboard' => 'Beranda',
     'addons' => 'Addons',
     'movies' => 'Film',
     'favorites' => 'Favorit',

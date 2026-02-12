@@ -93,5 +93,6 @@
     const addFavoriteUrl = '{{ route("movies.favorite.add") }}';
     const removeFavoriteUrl = '{{ route("movies.favorite.remove") }}';
     const getAllFavoritesUrl = '{{ route("movies.favorites") }}';
+    const tokenCsrf = '{{ csrf_token() }}';
 </script>
 @endpush

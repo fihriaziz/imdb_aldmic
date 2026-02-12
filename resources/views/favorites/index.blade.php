@@ -45,10 +45,12 @@
             </div>
         </div>
     </div>
-
+@endsection
+@push('js')
     <script>
         const removeFavoriteUrl = '{{ route("movies.favorite.remove") }}';
         const getAllFavoritesUrl = '{{ route("movies.favorites") }}';
         const tokenCsrf = '{{ csrf_token() }}';
+        const apiUrl = '{{ route("movies") }}';
     </script>
-@endsection
+@endpush

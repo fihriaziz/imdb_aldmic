@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <div class="row mb-4">
         <div class="col-md-12">
-            <a href="{{ route('movies.list') }}" class="btn btn-secondary mb-3">
+            <a href="{{ route('home') }}" class="btn btn-secondary mb-3">
                 ← Back to Movies
             </a>
         </div>
@@ -134,7 +134,7 @@
         <div class="alert alert-danger" role="alert">
             <h4 class="alert-heading">Movie Not Found</h4>
             <p>The movie you're looking for could not be found. Please try searching again.</p>
-            <a href="{{ route('movies.list') }}" class="btn btn-primary">Back to Movies</a>
+            <a href="{{ route('movies') }}" class="btn btn-primary">Back to Movies</a>
         </div>
     @endif
 </div>
